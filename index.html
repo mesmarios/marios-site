@@ -584,10 +584,19 @@ body::before {
   .pull-quote { padding-left: 1rem; font-size: 0.95rem; }
 
   /* ── Slide 06: loop diagram horizontal scroll ── */
-  .loop-diagram { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .loop-diagram { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  #slide-06 > .fade-up:last-child { width: 100%; overflow-x: auto; font-size: 0.68rem; }
 
-  /* ── Slide 08: formula — remove nowrap (critical!) ── */
-  .formula-hero { white-space: normal; overflow-x: auto; padding: 1rem 1.2rem; font-size: 0.85rem; }
+  /* ── Slide 07: decision flowchart — SVG horizontal scroll ── */
+  #slide-07 { padding: 1.8rem 0.8rem; }
+  #slide-07 .slide-title { font-size: 1.1rem; }
+  #slide-07 .title-underline { margin-bottom: 0.8rem; }
+  #slide-07 .fade-up:nth-child(3) { overflow-x: auto; width: 100%; -webkit-overflow-scrolling: touch; }
+  #slide-07 svg { min-width: 520px; }
+  #slide-07 .fade-up:last-child { font-size: 0.65rem; margin-top: 0.3rem; }
+
+  /* ── Slide 08: formula — allow wrapping + smaller size ── */
+  .formula-hero { white-space: normal; overflow-x: auto; padding: 1rem 1.2rem; font-size: 0.72rem; letter-spacing: 0; }
 
   /* ── Slide 09: regularization term labels ── */
   .term-labels { gap: 0.8rem; }
@@ -612,6 +621,16 @@ body::before {
 
   /* ── Slide 14: flowchart SVG scroll ── */
   .flow-svg { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* ── Slide 15: applications — compact for mobile ── */
+  #slide-15 { padding: 2rem 1rem; justify-content: flex-start; padding-top: 3rem; }
+  #slide-15 .slide-title { font-size: 1.1rem; }
+  #slide-15 .title-underline { margin-bottom: 1rem; }
+  #slide-15 .app-grid { gap: 0.6rem; max-width: 100%; }
+  #slide-15 .app-card { padding: 0.7rem 1rem; gap: 0.2rem; }
+  #slide-15 .app-icon { font-size: 1.1rem; }
+  #slide-15 .app-title { font-size: 0.85rem; }
+  #slide-15 .app-desc { font-size: 0.6rem; }
 
   /* ── Slide 16: conclusion statements ── */
   .concl-statements { gap: 1rem; margin-bottom: 1.5rem; }
@@ -966,7 +985,7 @@ body::before {
   <div class="fade-up slide-title">Μαθηματικό Υπόβαθρο</div>
   <div class="fade-up title-underline"></div>
   <div class="fade-up formula-hero">
-    obj<sup>(t)</sup> = &Sigma; <i>l</i>( y<sub>i</sub>, ŷ<sub>i</sub><sup>(t)</sup> ) &nbsp;+&nbsp; &Sigma; &Omega;( f<sub>i</sub> )
+    obj<sup>(t)</sup> = &Sigma; <i>l</i>( y<sub>i</sub>, ŷ<sub>i</sub><sup>(t)</sup> ) + &Sigma; &Omega;( f<sub>i</sub> )
   </div>
   <div class="fade-up math-cols">
     <div class="math-card">
