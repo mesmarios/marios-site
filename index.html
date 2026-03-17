@@ -1,9 +1,1264 @@
 <!DOCTYPE html>
-<html>
+<html lang="el">
 <head>
-  <title>My Site</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XGBoost — Academic Presentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script>
+MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+  startup: { ready() { MathJax.startup.defaultReady(); } }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+<style>
+/* ─── Reset & Base ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0D0D0D;
+  --text: #F5F0E8;
+  --accent: #C4A882;
+  --accent2: #8B7355;
+  --code-bg: #1A1A1A;
+  --border: #2A2A2A;
+  --ff-display: 'Playfair Display', Georgia, serif;
+  --ff-mono: 'IBM Plex Mono', 'Courier New', monospace;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--ff-mono);
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ─── Grain Texture ─── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.6;
+}
+
+/* ─── Progress Bar ─── */
+#progress {
+  position: fixed; top: 0; left: 0;
+  height: 2px;
+  background: var(--accent);
+  transition: width 0.4s ease;
+  z-index: 100;
+}
+
+/* ─── Slide Counter ─── */
+#counter {
+  position: fixed; bottom: 2rem; right: 2.5rem;
+  font-family: var(--ff-mono);
+  font-size: 0.75rem;
+  color: var(--accent2);
+  letter-spacing: 0.15em;
+  z-index: 100;
+}
+
+/* ─── Navigation Arrows ─── */
+.nav-arrow {
+  position: fixed; top: 50%; transform: translateY(-50%);
+  width: 48px; height: 48px;
+  border: 1px solid var(--border);
+  background: rgba(13,13,13,0.7);
+  color: var(--accent2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  transition: all 0.2s ease;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+}
+.nav-arrow:hover { border-color: var(--accent); color: var(--accent); }
+#nav-prev { left: 1.5rem; }
+#nav-next { right: 1.5rem; }
+.nav-arrow.hidden { opacity: 0; pointer-events: none; }
+
+/* ─── Slides Container ─── */
+#slides { width: 100%; height: 100%; position: relative; }
+
+/* ─── Single Slide ─── */
+.slide {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 5rem 8rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+.slide.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ─── Animation helpers ─── */
+.fade-up {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.slide.active .fade-up { opacity: 1; transform: translateY(0); }
+.slide.active .fade-up:nth-child(1) { transition-delay: 0.05s; }
+.slide.active .fade-up:nth-child(2) { transition-delay: 0.15s; }
+.slide.active .fade-up:nth-child(3) { transition-delay: 0.25s; }
+.slide.active .fade-up:nth-child(4) { transition-delay: 0.35s; }
+.slide.active .fade-up:nth-child(5) { transition-delay: 0.45s; }
+.slide.active .fade-up:nth-child(6) { transition-delay: 0.55s; }
+.slide.active .fade-up:nth-child(7) { transition-delay: 0.65s; }
+
+/* ─── Typography ─── */
+.display-title {
+  font-family: var(--ff-display);
+  font-size: clamp(3rem, 8vw, 7rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.slide-title {
+  font-family: var(--ff-display);
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin-bottom: 0.5rem;
+}
+.title-underline {
+  width: 60px; height: 2px;
+  background: var(--accent);
+  margin-bottom: 2.5rem;
+}
+.accent { color: var(--accent); }
+.mono { font-family: var(--ff-mono); }
+
+/* ─── SLIDE 01 — Title ─── */
+#slide-01 {
+  text-align: center;
+  gap: 0;
+}
+#slide-01 .display-title { margin-bottom: 0.2rem; }
+#slide-01 .subtitle {
+  font-family: var(--ff-display);
+  font-style: italic;
+  font-size: clamp(1rem, 2.5vw, 1.6rem);
+  color: var(--accent);
+  margin-bottom: 1.2rem;
+}
+#slide-01 .tagline {
+  font-family: var(--ff-mono);
+  font-size: 0.85rem;
+  color: var(--accent2);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 3rem;
+}
+#slide-01 .divider {
+  width: 100px; height: 1px;
+  background: var(--border);
+  margin: 0 auto 2rem;
+}
+#slide-01 .team {
+  font-family: var(--ff-mono);
+  font-size: 0.7rem;
+  color: var(--accent2);
+  letter-spacing: 0.12em;
+  line-height: 2;
+}
+#slide-01 .course {
+  font-family: var(--ff-mono);
+  font-size: 0.65rem;
+  color: #555;
+  letter-spacing: 0.1em;
+  margin-top: 0.8rem;
+}
+
+/* ─── SLIDE 02 — Hierarchy ─── */
+.hierarchy {
+  display: flex; flex-direction: column; gap: 0;
+  width: 100%; max-width: 680px;
+  position: relative;
+}
+.hierarchy::before {
+  content: '';
+  position: absolute; left: 11px; top: 24px; bottom: 24px;
+  width: 1px; background: var(--border);
+}
+.hier-item {
+  display: flex; align-items: flex-start; gap: 1.2rem;
+  padding: 0.6rem 0;
+  position: relative;
+}
+.hier-dot {
+  width: 23px; height: 23px; border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0; margin-top: 2px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.55rem; color: var(--accent2);
+}
+.hier-item.highlight .hier-dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+.hier-content {}
+.hier-label {
+  font-family: var(--ff-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.hier-item.highlight .hier-label { color: var(--accent); }
+.hier-desc {
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  color: var(--accent2);
+  margin-top: 2px;
+}
+.hier-indent-1 { padding-left: 1.5rem; }
+.hier-indent-2 { padding-left: 3rem; }
+.hier-indent-3 { padding-left: 4.5rem; }
+.hier-indent-4 { padding-left: 6rem; }
+
+/* ─── SLIDE 03 — Supervised Learning ─── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; width: 100%; max-width: 800px; }
+.example-card {
+  border: 1px solid var(--border);
+  padding: 1.2rem 1.5rem;
+  display: flex; flex-direction: column; gap: 0.6rem;
+  background: #111;
+}
+.card-input { font-family: var(--ff-mono); font-size: 0.75rem; color: var(--accent2); }
+.card-arrow { color: var(--accent); font-size: 1rem; }
+.card-output { font-family: var(--ff-display); font-size: 1.1rem; font-weight: 600; color: var(--text); }
+.bottom-note {
+  font-family: var(--ff-mono);
+  font-size: 0.75rem;
+  color: var(--accent2);
+  border-top: 1px solid var(--border);
+  padding-top: 1.2rem;
+  margin-top: 0.5rem;
+  width: 100%; max-width: 800px;
+  text-align: center;
+}
+.examples-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+  width: 100%; max-width: 800px;
+}
+
+/* ─── SLIDE 04 — What is XGBoost ─── */
+.pull-quote {
+  font-family: var(--ff-display);
+  font-style: italic;
+  font-size: clamp(1rem, 2.2vw, 1.5rem);
+  color: var(--text);
+  text-align: center;
+  max-width: 700px;
+  line-height: 1.6;
+  border-left: 3px solid var(--accent);
+  padding-left: 2rem;
+  margin-bottom: 2.5rem;
+}
+.stat-cards { display: flex; gap: 1.2rem; }
+.stat-card {
+  border: 1px solid var(--border);
+  padding: 1.2rem 1.5rem;
+  background: #111;
+  text-align: center; min-width: 160px;
+}
+.stat-top {
+  font-family: var(--ff-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  display: block;
+}
+.stat-bottom {
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  color: var(--accent2);
+  display: block;
+  margin-top: 0.3rem;
+  letter-spacing: 0.05em;
+}
+
+/* ─── SLIDE 05 — Steps ─── */
+.steps-container {
+  display: flex; flex-direction: column;
+  width: 100%; max-width: 640px;
+  gap: 0; position: relative;
+}
+.steps-container::before {
+  content: '';
+  position: absolute; left: 15px; top: 24px; bottom: 24px;
+  width: 1px; background: var(--border);
+}
+.step {
+  display: flex; gap: 1.5rem; align-items: flex-start;
+  padding: 0.75rem 0;
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.step.visible { opacity: 1; transform: translateY(0); }
+.step-num {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--ff-mono); font-size: 0.7rem;
+  color: var(--accent); flex-shrink: 0;
+  background: var(--bg); position: relative; z-index: 1;
+}
+.step-content {}
+.step-title {
+  font-family: var(--ff-display); font-size: 1rem; font-weight: 600;
+  color: var(--text); margin-bottom: 0.2rem;
+}
+.step-desc { font-family: var(--ff-mono); font-size: 0.72rem; color: var(--accent2); }
+
+/* ─── SLIDE 06 — Boosting Loop ─── */
+.loop-diagram {
+  display: flex; align-items: center; gap: 0;
+  flex-wrap: nowrap; overflow-x: auto;
+  max-width: 100%;
+  padding: 1rem 0;
+}
+.loop-node {
+  display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+  flex-shrink: 0;
+}
+.loop-box {
+  border: 1px solid var(--border);
+  padding: 0.6rem 0.9rem;
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  color: var(--text);
+  text-align: center;
+  background: #111;
+  white-space: nowrap;
+}
+.loop-box.highlight {
+  border-color: var(--accent);
+  background: rgba(196,168,130,0.08);
+  color: var(--accent);
+}
+.loop-label {
+  font-family: var(--ff-mono);
+  font-size: 0.6rem;
+  color: var(--accent2);
+  text-align: center;
+}
+.loop-arrow {
+  font-size: 1rem; color: var(--border);
+  margin: 0 0.3rem; flex-shrink: 0;
+  align-self: center; padding-bottom: 1.2rem;
+}
+.loop-caption {
+  font-family: var(--ff-mono); font-size: 0.75rem;
+  color: var(--accent2); text-align: center; margin-top: 1rem;
+  font-style: italic;
+}
+
+/* ─── SLIDE 07 — Math ─── */
+.formula-hero {
+  font-family: var(--ff-mono);
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  color: var(--accent);
+  text-align: center;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  padding: 1.5rem 2.5rem;
+  margin-bottom: 2rem;
+  letter-spacing: 0.05em;
+  max-width: 700px;
+  width: 100%;
+}
+.math-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; width: 100%; max-width: 700px; }
+.math-card {
+  border: 1px solid var(--border);
+  padding: 1.2rem 1.5rem;
+  background: #111;
+}
+.math-card-title {
+  font-family: var(--ff-display); font-size: 1rem; font-weight: 600;
+  color: var(--accent); margin-bottom: 0.5rem;
+}
+.math-card-body { font-family: var(--ff-mono); font-size: 0.75rem; color: var(--accent2); line-height: 1.6; }
+
+/* ─── SLIDE 08 — Regularization ─── */
+.reg-formula {
+  font-family: var(--ff-mono);
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  color: var(--accent);
+  margin: 1rem 0 2rem;
+}
+.term-labels { display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem; }
+.term-label {
+  display: flex; flex-direction: column; gap: 0.3rem;
+}
+.term-sym { font-family: var(--ff-mono); font-size: 1.1rem; color: var(--accent); font-weight: 600; }
+.term-desc { font-family: var(--ff-mono); font-size: 0.7rem; color: var(--accent2); }
+
+.fit-diagram {
+  display: flex; gap: 2rem; align-items: flex-start;
+}
+.fit-chart {
+  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+}
+.fit-chart svg { border: 1px solid var(--border); }
+.fit-label { font-family: var(--ff-mono); font-size: 0.65rem; color: var(--accent2); }
+
+/* ─── SLIDE 09 — Taylor ─── */
+.taylor-formula {
+  font-family: var(--ff-mono);
+  font-size: clamp(0.8rem, 1.8vw, 1.1rem);
+  color: var(--accent);
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  padding: 1.5rem 2rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  max-width: 700px; width: 100%;
+  line-height: 2;
+}
+.grad-cards { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; }
+.grad-card {
+  border: 1px solid var(--border);
+  padding: 1.2rem 1.8rem;
+  background: #111;
+  text-align: center;
+}
+.grad-sym { font-family: var(--ff-display); font-size: 1.8rem; color: var(--accent); font-weight: 700; }
+.grad-name { font-family: var(--ff-mono); font-size: 0.68rem; color: var(--accent2); margin-top: 0.3rem; }
+.taylor-caption { font-family: var(--ff-mono); font-size: 0.75rem; color: var(--accent2); font-style: italic; text-align: center; }
+
+/* ─── SLIDE 10 — Feature Importance ─── */
+.bar-chart { width: 100%; max-width: 620px; display: flex; flex-direction: column; gap: 1rem; }
+.bar-row { display: flex; align-items: center; gap: 1rem; }
+.bar-label { font-family: var(--ff-mono); font-size: 0.75rem; color: var(--accent2); width: 110px; text-align: right; flex-shrink: 0; }
+.bar-track { flex: 1; height: 8px; background: #1A1A1A; border: 1px solid var(--border); position: relative; }
+.bar-fill {
+  height: 100%; background: var(--accent);
+  width: 0; transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+.bar-val { font-family: var(--ff-mono); font-size: 0.7rem; color: var(--accent); width: 40px; flex-shrink: 0; }
+.bar-chart-caption { font-family: var(--ff-mono); font-size: 0.73rem; color: var(--accent2); font-style: italic; text-align: center; margin-top: 0.5rem; }
+
+/* ─── SLIDE 11 — Python ─── */
+.code-block {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  padding: 1.5rem 2rem;
+  width: 100%; max-width: 680px;
+  border-left: 3px solid var(--accent);
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+}
+.code-block pre { font-family: var(--ff-mono); font-size: 0.78rem; line-height: 1.8; }
+.kw { color: #C792EA; }
+.fn { color: #82AAFF; }
+.str { color: #C3E88D; }
+.cm { color: #546E7A; }
+.num { color: #F78C6C; }
+.cl { color: var(--accent); }
+.result-card {
+  border: 1px solid var(--accent);
+  background: rgba(196,168,130,0.06);
+  padding: 0.9rem 1.8rem;
+  font-family: var(--ff-mono);
+  font-size: 0.82rem;
+  color: var(--accent);
+  display: flex; align-items: center; gap: 0.8rem;
+}
+.result-card::before { content: '▶'; font-size: 0.6rem; }
+
+/* ─── SLIDE 12 — Comparison Table ─── */
+.cmp-table { width: 100%; max-width: 800px; border-collapse: collapse; }
+.cmp-table th {
+  font-family: var(--ff-mono); font-size: 0.7rem; letter-spacing: 0.1em;
+  color: var(--accent2); text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  padding: 0.8rem 1rem; text-align: left;
+}
+.cmp-table td {
+  font-family: var(--ff-mono); font-size: 0.8rem;
+  color: var(--text);
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.cmp-table tr.highlight-row td {
+  background: rgba(196,168,130,0.08);
+  color: var(--accent);
+}
+.cmp-table tr.highlight-row td:first-child { font-weight: 600; }
+.stars { letter-spacing: 0.1em; }
+.star-on { color: var(--accent); }
+.star-off { color: var(--border); }
+
+/* ─── SLIDE 13 — Flowchart ─── */
+.flow-svg { max-width: 700px; width: 100%; }
+
+/* ─── SLIDE 14 — Applications ─── */
+.app-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; width: 100%; max-width: 700px; }
+.app-card {
+  border: 1px solid var(--border);
+  padding: 1.4rem 1.5rem;
+  background: #111;
+  display: flex; flex-direction: column; gap: 0.5rem;
+}
+.app-icon { font-size: 1.5rem; }
+.app-title { font-family: var(--ff-display); font-size: 1rem; font-weight: 600; color: var(--accent); }
+.app-desc { font-family: var(--ff-mono); font-size: 0.7rem; color: var(--accent2); }
+
+/* ─── SLIDE 15 — Conclusion ─── */
+.concl-statements { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 3rem; width: 100%; max-width: 660px; }
+.concl-stmt {
+  font-family: var(--ff-display); font-size: clamp(1rem, 2.2vw, 1.4rem);
+  color: var(--text); text-align: center;
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  padding: 1rem 1.5rem;
+  border: 1px solid var(--border);
+}
+.concl-stmt.visible { opacity: 1; transform: translateY(0); }
+.final-quote {
+  text-align: center;
+  max-width: 600px;
+}
+.final-quote blockquote {
+  font-family: var(--ff-display);
+  font-style: italic;
+  font-size: clamp(0.9rem, 1.8vw, 1.15rem);
+  color: var(--accent2);
+  border-left: none;
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+.final-quote cite {
+  font-family: var(--ff-mono);
+  font-size: 0.65rem;
+  color: #555;
+  letter-spacing: 0.1em;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .slide { padding: 4rem 3rem; }
+  .examples-grid { grid-template-columns: 1fr; }
+  .stat-cards { flex-wrap: wrap; }
+  .math-cols { grid-template-columns: 1fr; }
+  .app-grid { grid-template-columns: 1fr; }
+  .grad-cards { flex-wrap: wrap; }
+  .fit-diagram { flex-direction: column; }
+}
+@media (max-width: 600px) {
+  .slide { padding: 3rem 1.5rem; }
+  .loop-diagram { overflow-x: auto; }
+  .cmp-table { font-size: 0.65rem; }
+  .cmp-table td, .cmp-table th { padding: 0.5rem 0.5rem; }
+}
+</style>
 </head>
 <body>
-  <h1>Hello World</h1>
+
+<!-- Progress -->
+<div id="progress"></div>
+
+<!-- Counter -->
+<div id="counter">01 / 15</div>
+
+<!-- Nav Arrows -->
+<button class="nav-arrow hidden" id="nav-prev" aria-label="Previous">&#8592;</button>
+<button class="nav-arrow" id="nav-next" aria-label="Next">&#8594;</button>
+
+<div id="slides">
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 01 — TITLE
+══════════════════════════════════════════════ -->
+<section class="slide active" id="slide-01">
+  <div class="fade-up">
+    <div class="display-title">XGBoost</div>
+  </div>
+  <div class="fade-up">
+    <div style="font-family:var(--ff-display);font-style:italic;font-size:clamp(1rem,2.5vw,1.6rem);color:var(--accent);margin:0.3rem 0 1rem;">eXtreme Gradient Boosting</div>
+  </div>
+  <div class="fade-up">
+    <div style="font-family:var(--ff-mono);font-size:0.82rem;color:var(--accent2);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:2.5rem;">Θεωρία &nbsp;·&nbsp; Μαθηματικό Υπόβαθρο &nbsp;·&nbsp; Εφαρμογές</div>
+  </div>
+  <div class="fade-up">
+    <div style="width:80px;height:1px;background:var(--border);margin:0 auto 2rem;"></div>
+  </div>
+  <div class="fade-up">
+    <div style="font-family:var(--ff-mono);font-size:0.68rem;color:var(--accent2);letter-spacing:0.1em;line-height:2.2;text-align:center;">
+      ΒΑΦΕΙΑΔΗΣ ΠΑΡΑΣΚΕΥΑΣ &nbsp;·&nbsp; ΠΑΠΑΣΤΑΜΑΤΙΟΥ ΡΩΜΑΝΟΣ &nbsp;·&nbsp; ΣΙΗΤΤΑΣ ΜΑΡΙΟΣ<br>
+      ΤΣΑΔΙΩΤΗΣ ΜΙΧΑΛΗΣ &nbsp;·&nbsp; ΜΕΣΑΡΙΤΗΣ ΜΑΡΙΟΣ
+    </div>
+    <div style="font-family:var(--ff-mono);font-size:0.6rem;color:#444;letter-spacing:0.1em;text-align:center;margin-top:0.8rem;">
+      CSE_329 / CEI_329 &nbsp;—&nbsp; Αναστάσιος Αντωνιάδης
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 02 — WHERE DOES XGBOOST SIT
+══════════════════════════════════════════════ -->
+<section class="slide" id="slide-02">
+  <div class="fade-up slide-title">Πού κάθεται ο XGBoost;</div>
+  <div class="fade-up title-underline"></div>
+  <div class="fade-up hierarchy">
+    <div class="hier-item">
+      <div class="hier-dot">01</div>
+      <div class="hier-content">
+        <div class="hier-label">Machine Learning</div>
+        <div class="hier-desc">Αλγόριθμοι που μαθαίνουν από δεδομένα</div>
+      </div>
+    </div>
+    <div class="hier-item hier-indent-1">
+      <div class="hier-dot">02</div>
+      <div class="hier-content">
+        <div class="hier-label">Supervised Learning</div>
+        <div class="hier-desc">Εκπαίδευση με labeled examples (X → Y)</div>
+      </div>
+    </div>
+    <div class="hier-item hier-indent-2">
+      <div class="hier-dot">03</div>
+      <div class="hier-content">
+        <div class="hier-label">Ensemble Methods</div>
+        <div class="hier-desc">Συνδυασμός πολλαπλών μοντέλων για καλύτερη απόδοση</div>
+      </div>
+    </div>
+    <div class="hier-item hier-indent-3">
+      <div class="hier-dot">04</div>
+      <div class="hier-content">
+        <div class="hier-label">Boosting</div>
+        <div class="hier-desc">Σειριακή οικοδόμηση — κάθε μοντέλο διορθώνει το προηγούμενο</div>
+      </div>
+    </div>
+    <div class="hier-item hier-indent-4 highlight">
+      <div class="hier-dot">✦</div>
+      <div class="hier-content">
+        <div class="hier-label">XGBoost</div>
+        <div class="hier-desc">Βελτιστοποιημένο Gradient Boosting με regularization</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 03 — SUPERVISED LEARNING
+══════════════════════════════════════════════ -->
+<section class="slide" id="slide-03">
+  <div class="fade-up slide-title">Supervised Learning</div>
+  <div class="fade-up title-underline"></div>
+  <div class="fade-up examples-grid">
+    <div class="example-card">
+      <div class="card-input">INPUT (X)</div>
+      <div style="font-family:var(--ff-mono);font-size:0.85rem;color:var(--text);">Email text</div>
+      <div class="card-arrow">→</div>
+      <div class="card-input">OUTPUT (Y)</div>
+      <div class="card-output">Spam / Not Spam</div>
+    </div>
+    <div class="example-card">
+      <div class="card-input">INPUT (X)</div>
+      <div style="font-family:var(--ff-mono);font-size:0.85rem;color:var(--text);">House m²</div>
+      <div class="card-arrow">→</div>
+      <div class="card-input">OUTPUT (Y)</div>
+      <div class="card-output">Price €</div>
+    </div>
+    <div class="example-card">
+      <div class="card-input">INPUT (X)</div>
+      <div style="font-family:var(--ff-mono);font-size:0.85rem;color:var(--text);">Patient data</div>
+      <div class="card-arrow">→</div>
+      <div class="card-input">OUTPUT (Y)</div>
+      <div class="card-output">Disease Yes/No</div>
+    </div>
+  </div>
+  <div class="fade-up bottom-note">
+    Το μοντέλο μαθαίνει τη σχέση <span class="accent">X → Y</span> από παραδείγματα με γνωστή απάντηση
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 04 — WHAT IS XGBOOST
+══════════════════════════════════════════════ -->
+<section class="slide" id="slide-04">
+  <div class="fade-up slide-title">Τι είναι ο XGBoost</div>
+  <div class="fade-up title-underline"></div>
+  <div class="fade-up pull-quote">
+    "Δεν φτιάχνουμε ένα δυνατό μοντέλο.<br>
+    Φτιάχνουμε πολλά αδύναμα που μαζί γίνονται αήττητα."
+  </div>
+  <div class="fade-up stat-cards">
+    <div class="stat-card">
+      <span class="stat-top">2016</span>
+      <span class="stat-bottom">Tianqi Chen<br>ACM SIGKDD</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-top">#1</span>
+      <span class="stat-bottom">Kaggle<br>Competitions</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-top">Best</span>
+      <span class="stat-bottom">Tabular Data<br>Performance</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 05 — HOW IT WORKS (step-by-step)
+══════════════════════════════════════════════ -->
+<section class="slide" id="slide-05" data-steps="5">
+  <div class="fade-up slide-title">Πώς Δουλεύει</div>
+  <div class="fade-up title-underline"></div>
+  <div class="fade-up steps-container">
+    <div class="step" data-step="1">
+      <div class="step-num">01</div>
+      <div class="step-content">
+        <div class="step-title">Αρχική Πρόβλεψη</div>
+        <div class="step-desc">Ξεκινάμε με μια απλή εκτίμηση (π.χ. μέση τιμή του Y)</div>
+      </div>
+    </div>
+    <div class="step" data-step="2">
+      <div class="step-num">02</div>
+      <div class="step-content">
+        <div class="step-title">Υπολογισμός Σφάλματος (Residual)</div>
+        <div class="step-desc">Μετράμε πόσο απέχει η πρόβλεψη από την πραγματικότητα</div>
+      </div>
+    </div>
+    <div class="step" data-step="3">
+      <div class="step-num">03</div>
+      <div class="step-content">
+        <div class="step-title">Νέο Δέντρο Μαθαίνει το Σφάλμα</div>
+        <div class="step-desc">Ένα decision tree εκπαιδεύεται πάνω στα residuals</div>
+      </div>
+    </div>
+    <div class="step" data-step="4">
+      <div class="step-num">04</div>
+      <div class="step-content">
+        <div class="step-title">Προστίθεται στο Μοντέλο</div>
+        <div class="step-desc">Το νέο δέντρο προστίθεται με μικρό learning rate η</div>
+      </div>
+    </div>
+    <div class="step" data-step="5">
+      <div class="step-num">05</div>
+      <div class="step-content">
+        <div class="step-title">Επανάληψη μέχρι Σύγκλιση</div>
+        <div class="step-desc">Ο κύκλος επαναλαμβάνεται για N δέντρα (n_estimators)</div>
+      </div>
+    </div>
+  </div>
+  <div class="fade-up" style="font-family:var(--ff-mono);font-size:0.68rem;color:#444;margin-top:1rem;">
+    ← χρησιμοποιήστε τα βέλη για να αποκαλυφθεί κάθε βήμα
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 06 — BOOSTING LOOP
+══════════════════════════════════════════════ -->
+<section class="slide" id="slide-06">
+  <div class="fade-up slide-title">Το Boosting Loop</div>
+  <div class="fade-up title-underline"></div>
+  <div class="fade-up loop-diagram">
+    <div class="loop-node">
+      <div class="loop-box">Data<br>D</div>
+      <div class="loop-label">Αρχικά<br>δεδομένα</div>
+    </div>
+    <div class="loop-arrow">→</div>
+    <div class="loop-node">
+      <div class="loop-box">Tree₁</div>
+      <div class="loop-label">1ο δέντρο</div>
+    </div>
+    <div class="loop-arrow">→</div>
+    <div class="loop-node">
+      <div class="loop-box" style="border-color:#444;color:#888;">r₁</div>
+      <div class="loop-label">Residuals</div>
+    </div>
+    <div class="loop-arrow">→</div>
+    <div class="loop-node">
+      <div class="loop-box">Tree₂</div>
+      <div class="loop-label">2ο δέντρο</div>
+    </div>
+    <div class="loop-arrow">→</div>
+    <div class="loop-node">
+      <div class="loop-box" style="border-color:#444;color:#888;">r₂</div>
+      <div class="loop-label">Residuals</div>
+    </div>
+    <div class="loop-arrow">→</div>
+    <div class="loop-node">
+      <div class="loop-box">Tree₃</div>
+      <div class="loop-label">3ο δέντρο</div>
+    </div>
+    <div class="loop-arrow" style="color:var(--accent);">→</div>
+    <div class="loop-node">
+      <div class="loop-box highlight">Ŷ final</div>
+      <div class="loop-label" style="color:var(--accent);">Τελικό<br>μοντέλο</div>
+    </div>
+  </div>
+  <div class="fade-up loop-caption">
+    Κάθε δέντρο διορθώνει τα λάθη του προηγούμενου
+  </div>
+  <div class="fade-up" style="margin-top:2rem;max-width:640px;width:100%;">
+    <div style="font-family:var(--ff-mono);font-size:0.78rem;color:var(--accent2);text-align:center;border:1px solid var(--border);padding:1rem;background:#111;">
+      Ŷ<sub style="font-size:0.6rem">final</sub> &nbsp;=&nbsp; Ŷ<sub style="font-size:0.6rem">0</sub> &nbsp;+&nbsp; η·Tree₁ &nbsp;+&nbsp; η·Tree₂ &nbsp;+&nbsp; η·Tree₃ &nbsp;+&nbsp; …
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 07 — MATH FOUNDATIONS
+══════════════════════════════════════════════ -->
+<section class="slide" id="slide-07">
+  <div class="fade-up slide-title">Μαθηματικό Υπόβαθρο</div>
+  <div class="fade-up title-underline"></div>
+  <div class="fade-up formula-hero">
+    obj<sup>(t)</sup> = &Sigma; <i>l</i>( y<sub>i</sub>, ŷ<sub>i</sub><sup>(t)</sup> ) &nbsp;+&nbsp; &Sigma; &Omega;( f<sub>i</sub> )
+  </div>
+  <div class="fade-up math-cols">
+    <div class="math-card">
+      <div class="math-card-title">&#9312; Loss Function</div>
+      <div class="math-card-body">
+        Μετρά πόσο απέχει η πρόβλεψη από την πραγματική τιμή.<br><br>
+        Παραδείγματα:<br>
+        · MSE για regression<br>
+        · Log-loss για classification<br>
+        · Custom objectives
+      </div>
+    </div>
+    <div class="math-card">
+      <div class="math-card-title">&#9313; Regularization Ω</div>
+      <div class="math-card-body">
+        Ελέγχει την πολυπλοκότητα του μοντέλου.<br><br>
+        Αποτρέπει overfitting:<br>
+        · T = αριθμός φύλλων<br>
+        · w = βάρη φύλλων<br>
+        · γ, λ = hyperparameters
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 08 — REGULARIZATION
+══════════════════════════════════════════════ -->
+<section class="slide" id="slide-08">
+  <div class="fade-up slide-title">Regularization — Αποφεύγοντας το Overfitting</div>
+  <div class="fade-up title-underline"></div>
+  <div class="fade-up reg-formula">&Omega;(f) = &gamma;T &nbsp;+&nbsp; &frac12;&lambda; &Sigma; w<sub>j</sub>²</div>
+  <div class="fade-up term-labels">
+    <div class="term-label">
+      <span class="term-sym">γ (gamma)</span>
+      <span class="term-desc">Minimum loss reduction<br>για split. Μεγαλύτερο = απλούστερο δέντρο.</span>
+    </div>
+    <div class="term-label">
+      <span class="term-sym">T</span>
+      <span class="term-desc">Αριθμός φύλλων<br>στο δέντρο</span>
+    </div>
+    <div class="term-label">
+      <span class="term-sym">λ (lambda)</span>
+      <span class="term-desc">L2 regularization<br>στα βάρη φύλλων</span>
+    </div>
+    <div class="term-label">
+      <span class="term-sym">w<sub>j</sub></span>
+      <span class="term-desc">Βάρος (score)<br>κάθε φύλλου j</span>
+    </div>
+  </div>
+  <div class="fade-up fit-diagram">
+    <div class="fit-chart">
+      <svg width="200" height="100" viewBox="0 0 200 100">
+        <polyline points="10,80 50,40 100,60 150,20 190,50" fill="none" stroke="#C4A882" stroke-width="1.5"/>
+        <circle cx="10" cy="80" r="3" fill="#C4A882"/>
+        <circle cx="50" cy="38" r="3" fill="#C4A882"/>
+        <circle cx="100" cy="62" r="3" fill="#C4A882"/>
+        <circle cx="150" cy="18" r="3" fill="#C4A882"/>
+        <circle cx="190" cy="52" r="3" fill="#C4A882"/>
+        <!-- overfitted wiggly line -->
+        <path d="M10,80 C20,10 40,90 50,38 C60,0 80,100 100,62 C120,20 140,90 150,18 C165,0 180,90 190,52" fill="none" stroke="#8B7355" stroke-width="1" stroke-dasharray="4,3"/>
+      </svg>
+      <div class="fit-label">— Good fit &nbsp; ╌ Overfitting</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0.5rem;align-self:center;">
+      <div style="font-family:var(--ff-mono);font-size:0.7rem;color:var(--accent2);">Χωρίς Regularization → Overfitting</div>
+      <div style="font-family:var(--ff-mono);font-size:0.7rem;color:var(--accent);">Με Regularization → Γενίκευση</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 09 — TAYLOR EXPANSION
+══════════════════════════════════════════════ -->
+<section class="slide" id="slide-09">
+  <div class="fade-up slide-title">Taylor Expansion — Γιατί Είναι Γρήγορος</div>
+  <div class="fade-up title-underline"></div>
+  <div class="fade-up taylor-formula">
+    L<sup>(t)</sup> &asymp; &Sigma; [g<sub>i</sub>&thinsp;&middot;&thinsp;f<sub>t</sub>(x<sub>i</sub>) &nbsp;+&nbsp; &frac12;h<sub>i</sub>&thinsp;&middot;&thinsp;f<sub>t</sub>²(x<sub>i</sub>)] &nbsp;+&nbsp; &Omega;(f<sub>t</sub>)
+  </div>
+  <div class="fade-up grad-cards">
+    <div class="grad-card">
+      <div class="grad-sym">g<sub style="font-size:1rem">i</sub></div>
+      <div class="grad-name">Gradient<br><span style="color:#555">1η παράγωγος loss</span></div>
+    </div>
+    <div class="grad-card">
+      <div class="grad-sym">h<sub style="font-size:1rem">i</sub></div>
+      <div class="grad-name">Hessian<br><span style="color:#555">2η παράγωγος loss</span></div>
+    </div>
+  </div>
+  <div class="fade-up taylor-caption">
+    Η χρήση 2ης παραγώγου = ακριβέστερη βελτιστοποίηση από τo απλό Gradient Boosting
+  </div>
+  <div class="fade-up" style="margin-top:1.5rem;max-width:580px;width:100%;">
+    <div style="border:1px solid var(--border);padding:1rem;background:#111;font-family:var(--ff-mono);font-size:0.72rem;color:var(--accent2);">
+      Optimal leaf weight: &nbsp;<span style="color:var(--accent)">w*<sub>j</sub> = −(Σg<sub>i</sub>) / (Σh<sub>i</sub> + λ)</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 10 — FEATURE IMPORTANCE
+══════════════════════════════════════════════ -->
+<section class="slide" id="slide-10">
+  <div class="fade-up slide-title">Feature Importance</div>
+  <div class="fade-up title-underline"></div>
+  <div class="fade-up bar-chart" id="bar-chart">
+    <div class="bar-row">
+      <div class="bar-label">Income</div>
+      <div class="bar-track"><div class="bar-fill" data-width="84"></div></div>
+      <div class="bar-val">0.42</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Credit Score</div>
+      <div class="bar-track"><div class="bar-fill" data-width="62"></div></div>
+      <div class="bar-val">0.31</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Age</div>
+      <div class="bar-track"><div class="bar-fill" data-width="36"></div></div>
+      <div class="bar-val">0.18</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Loan History</div>
+      <div class="bar-track"><div class="bar-fill" data-width="18"></div></div>
+      <div class="bar-val">0.09</div>
+    </div>
+  </div>
+  <div class="fade-up bar-chart-caption" style="max-width:620px;width:100%;">
+    Ο XGBoost μας λέει ποιες μεταβλητές επηρεάζουν περισσότερο την πρόβλεψη
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 11 — PYTHON DEMO
+══════════════════════════════════════════════ -->
+<section class="slide" id="slide-11">
+  <div class="fade-up slide-title">Εφαρμογή σε Python</div>
+  <div class="fade-up title-underline"></div>
+  <div class="fade-up code-block">
+    <pre><span class="kw">from</span> <span class="cl">xgboost</span> <span class="kw">import</span> <span class="fn">XGBClassifier</span>
+<span class="kw">from</span> <span class="cl">sklearn.metrics</span> <span class="kw">import</span> <span class="fn">accuracy_score</span>
+
+<span class="cm"># Train model</span>
+model = <span class="fn">XGBClassifier</span>(
+    n_estimators=<span class="num">100</span>,
+    learning_rate=<span class="num">0.1</span>,
+    max_depth=<span class="num">6</span>
+)
+model.<span class="fn">fit</span>(X_train, y_train)
+
+<span class="cm"># Evaluate</span>
+predictions = model.<span class="fn">predict</span>(X_test)
+<span class="fn">print</span>(<span class="str">f"Accuracy: <span class="kw">{</span><span class="fn">accuracy_score</span>(y_test, predictions)<span class="kw">:.2%}</span>"</span>)</pre>
+  </div>
+  <div class="fade-up result-card">
+    Accuracy: <strong style="color:var(--accent);margin-left:0.5rem;">94.2%</strong>&nbsp; on Pima Indians Diabetes Dataset
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 12 — COMPARISON TABLE
+══════════════════════════════════════════════ -->
+<section class="slide" id="slide-12">
+  <div class="fade-up slide-title">Σύγκριση Αλγορίθμων</div>
+  <div class="fade-up title-underline"></div>
+  <div class="fade-up" style="width:100%;max-width:820px;overflow-x:auto;">
+    <table class="cmp-table">
+      <thead>
+        <tr>
+          <th>Αλγόριθμος</th>
+          <th>Τύπος Δεδομένων</th>
+          <th>Ακρίβεια</th>
+          <th>Ερμηνευσιμότητα</th>
+          <th>Ταχύτητα</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Linear Regression</td>
+          <td>Tabular</td>
+          <td class="stars"><span class="star-on">★★</span><span class="star-off">★</span></td>
+          <td class="stars"><span class="star-on">★★★</span></td>
+          <td class="stars"><span class="star-on">★★★</span></td>
+        </tr>
+        <tr>
+          <td>Random Forest</td>
+          <td>Tabular</td>
+          <td class="stars"><span class="star-on">★★★</span></td>
+          <td class="stars"><span class="star-on">★★</span><span class="star-off">★</span></td>
+          <td class="stars"><span class="star-on">★★</span><span class="star-off">★</span></td>
+        </tr>
+        <tr class="highlight-row">
+          <td>XGBoost ✦</td>
+          <td>Tabular</td>
+          <td class="stars"><span class="star-on">★★★</span></td>
+          <td class="stars"><span class="star-on">★★</span><span class="star-off">★</span></td>
+          <td class="stars"><span class="star-on">★★★</span></td>
+        </tr>
+        <tr>
+          <td>Neural Network</td>
+          <td>Images / Text</td>
+          <td class="stars"><span class="star-on">★★★</span></td>
+          <td class="stars"><span class="star-on">★</span><span class="star-off">★★</span></td>
+          <td class="stars"><span class="star-on">★</span><span class="star-off">★★</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 13 — WHEN TO USE (Flowchart)
+══════════════════════════════════════════════ -->
+<section class="slide" id="slide-13">
+  <div class="fade-up slide-title">Πότε να Χρησιμοποιείς XGBoost</div>
+  <div class="fade-up title-underline"></div>
+  <div class="fade-up flow-svg">
+    <svg viewBox="0 0 720 340" width="100%" style="max-width:720px;">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#2A2A2A"/>
+        </marker>
+        <marker id="arr-acc" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#C4A882"/>
+        </marker>
+      </defs>
+      <!-- Start -->
+      <rect x="280" y="10" width="160" height="44" rx="4" fill="#111" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="360" y="37" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" fill="#F5F0E8">Νέο Πρόβλημα;</text>
+      <!-- Arrow down -->
+      <line x1="360" y1="54" x2="360" y2="90" stroke="#2A2A2A" marker-end="url(#arr)"/>
+      <!-- Diamond 1 -->
+      <polygon points="360,90 460,135 360,180 260,135" fill="#111" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="360" y="130" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#C4A882">Tabular</text>
+      <text x="360" y="146" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#C4A882">Data?</text>
+      <!-- YES right -->
+      <line x1="460" y1="135" x2="530" y2="135" stroke="#2A2A2A" marker-end="url(#arr)"/>
+      <text x="492" y="127" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#8B7355">ΝΑΙ</text>
+      <!-- Diamond 2 -->
+      <polygon points="600,135 680,170 600,205 520,170" fill="#111" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="600" y="165" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#C4A882">Large</text>
+      <text x="600" y="180" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#C4A882">Dataset?</text>
+      <!-- YES down from diamond 2 -->
+      <line x1="600" y1="205" x2="600" y2="250" stroke="#C4A882" marker-end="url(#arr-acc)"/>
+      <text x="610" y="230" font-family="IBM Plex Mono" font-size="10" fill="#C4A882">ΝΑΙ</text>
+      <!-- XGBoost box -->
+      <rect x="520" y="250" width="160" height="50" rx="4" fill="rgba(196,168,130,0.1)" stroke="#C4A882" stroke-width="1.5"/>
+      <text x="600" y="271" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" fill="#C4A882" font-weight="600">XGBoost ✓</text>
+      <text x="600" y="290" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#8B7355">Καλύτερη επιλογή</text>
+      <!-- NO from diamond 2 -->
+      <line x1="600" y1="135" x2="600" y2="80" stroke="#2A2A2A" marker-end="url(#arr)"/>
+      <text x="686" y="138" font-family="IBM Plex Mono" font-size="10" fill="#555">ΟΧΙ</text>
+      <line x1="600" y1="80" x2="650" y2="80" stroke="#2A2A2A"/>
+      <rect x="650" y="58" width="62" height="44" rx="4" fill="#111" stroke="#2A2A2A"/>
+      <text x="681" y="76" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#8B7355">Linear</text>
+      <text x="681" y="91" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#8B7355">Regression</text>
+      <!-- NO from diamond 1 -->
+      <line x1="260" y1="135" x2="80" y2="135" stroke="#2A2A2A" marker-end="url(#arr)"/>
+      <text x="178" y="127" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#555">ΟΧΙ</text>
+      <!-- Diamond 3 -->
+      <polygon points="80,135 160,170 80,205 0,170" fill="#111" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="80" y="165" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#C4A882">Images/</text>
+      <text x="80" y="180" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#C4A882">Text?</text>
+      <!-- YES down -->
+      <line x1="80" y1="205" x2="80" y2="250" stroke="#2A2A2A" marker-end="url(#arr)"/>
+      <rect x="20" y="250" width="120" height="50" rx="4" fill="#111" stroke="#2A2A2A"/>
+      <text x="80" y="271" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#8B7355">Neural</text>
+      <text x="80" y="288" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#8B7355">Network</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 14 — REAL WORLD APPLICATIONS
+══════════════════════════════════════════════ -->
+<section class="slide" id="slide-14">
+  <div class="fade-up slide-title">Εφαρμογές στην Πραγματική Ζωή</div>
+  <div class="fade-up title-underline"></div>
+  <div class="fade-up app-grid">
+    <div class="app-card">
+      <div class="app-icon">💳</div>
+      <div class="app-title">Ανίχνευση Απάτης</div>
+      <div class="app-desc">Τράπεζες & Fintech — real-time fraud detection σε εκατομμύρια συναλλαγές</div>
+    </div>
+    <div class="app-card">
+      <div class="app-icon">🏥</div>
+      <div class="app-title">Ιατρική Διάγνωση</div>
+      <div class="app-desc">Πρόβλεψη ασθενειών από κλινικά δεδομένα ασθενών</div>
+    </div>
+    <div class="app-card">
+      <div class="app-icon">📈</div>
+      <div class="app-title">Πιστωτικός Κίνδυνος</div>
+      <div class="app-desc">Αξιολόγηση δανείων — scoring models για τράπεζες</div>
+    </div>
+    <div class="app-card">
+      <div class="app-icon">🏆</div>
+      <div class="app-title">Kaggle Competitions</div>
+      <div class="app-desc">#1 αλγόριθμος στις περισσότερες νικηφόρες λύσεις tabular data</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 15 — CONCLUSION
+══════════════════════════════════════════════ -->
+<section class="slide" id="slide-15" data-steps="3">
+  <div class="fade-up slide-title">Συμπεράσματα</div>
+  <div class="fade-up title-underline"></div>
+  <div class="fade-up concl-statements">
+    <div class="concl-stmt" data-step="1">Ισχυρός σε δομημένα δεδομένα</div>
+    <div class="concl-stmt" data-step="2">Ελέγχει την πολυπλοκότητα με Regularization</div>
+    <div class="concl-stmt" data-step="3">Ο αλγόριθμος επιλογής για tabular ML</div>
+  </div>
+  <div class="fade-up final-quote">
+    <blockquote>"XGBoost wins every tabular data competition."</blockquote>
+    <cite>— Kaggle Community</cite>
+  </div>
+</section>
+
+</div><!-- #slides -->
+
+<script>
+(function() {
+  'use strict';
+
+  const TOTAL = 15;
+  let current = 1;
+  // Step state for step-reveal slides
+  const stepState = {}; // slideNum -> revealed count
+
+  function getSlide(n) {
+    return document.getElementById('slide-' + String(n).padStart(2,'0'));
+  }
+
+  function updateUI() {
+    // Progress
+    document.getElementById('progress').style.width = ((current / TOTAL) * 100) + '%';
+    // Counter
+    document.getElementById('counter').textContent =
+      String(current).padStart(2,'0') + ' / ' + String(TOTAL).padStart(2,'0');
+    // Nav arrows
+    document.getElementById('nav-prev').classList.toggle('hidden', current === 1);
+    document.getElementById('nav-next').classList.toggle('hidden', current === TOTAL);
+  }
+
+  function showSlide(n) {
+    getSlide(current).classList.remove('active');
+    current = n;
+    const slide = getSlide(current);
+    slide.classList.add('active');
+    updateUI();
+    // Trigger bar animations on slide 10
+    if (current === 10) animateBars();
+    // Init step-reveal slides
+    if (slide.dataset.steps) initStepSlide(slide);
+  }
+
+  function initStepSlide(slide) {
+    const steps = slide.querySelectorAll('[data-step]');
+    const revealed = stepState[current] || 0;
+    steps.forEach((el, i) => {
+      if (i < revealed) el.classList.add('visible');
+      else el.classList.remove('visible');
+    });
+  }
+
+  function revealNextStep() {
+    const slide = getSlide(current);
+    if (!slide.dataset.steps) return false;
+    const total = parseInt(slide.dataset.steps);
+    const revealed = stepState[current] || 0;
+    if (revealed < total) {
+      stepState[current] = revealed + 1;
+      const el = slide.querySelector('[data-step="' + (revealed + 1) + '"]');
+      if (el) el.classList.add('visible');
+      return true; // consumed the event
+    }
+    return false;
+  }
+
+  function hasUnrevealedSteps() {
+    const slide = getSlide(current);
+    if (!slide.dataset.steps) return false;
+    const total = parseInt(slide.dataset.steps);
+    const revealed = stepState[current] || 0;
+    return revealed < total;
+  }
+
+  function goNext() {
+    if (hasUnrevealedSteps()) { revealNextStep(); return; }
+    if (current < TOTAL) showSlide(current + 1);
+  }
+
+  function goPrev() {
+    if (current > 1) showSlide(current - 1);
+  }
+
+  // Keyboard
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goNext(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev(); }
+  });
+
+  // Buttons
+  document.getElementById('nav-next').addEventListener('click', goNext);
+  document.getElementById('nav-prev').addEventListener('click', goPrev);
+
+  // Touch / Swipe
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) dx < 0 ? goNext() : goPrev();
+  });
+
+  // Bar chart animation
+  function animateBars() {
+    document.querySelectorAll('.bar-fill').forEach((bar) => {
+      const w = bar.dataset.width;
+      setTimeout(() => { bar.style.width = w + '%'; }, 100);
+    });
+  }
+
+  // Init
+  updateUI();
+  // Trigger bar fill reset when leaving slide 10
+  const origShowSlide = showSlide;
+  // reset bars when navigating away
+  document.addEventListener('keydown', () => {
+    if (current !== 10) {
+      document.querySelectorAll('.bar-fill').forEach(b => b.style.width = '0');
+    }
+  });
+
+})();
+</script>
 </body>
 </html>
