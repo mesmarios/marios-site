@@ -18,11 +18,11 @@ MathJax = {
 
 :root {
   --bg: #0D0D0D;
-  --text: #F5F0E8;
-  --accent: #C4A882;
-  --accent2: #8B7355;
+  --text: #FFFFFF;
+  --accent: #D4B896;
+  --accent2: #C4A070;
   --code-bg: #1A1A1A;
-  --border: #2A2A2A;
+  --border: #404040;
   --ff-display: 'Playfair Display', Georgia, serif;
   --ff-mono: 'IBM Plex Mono', 'Courier New', monospace;
 }
@@ -162,7 +162,7 @@ body::before {
 #slide-01 .course {
   font-family: var(--ff-mono);
   font-size: 0.65rem;
-  color: #555;
+  color: #999;
   letter-spacing: 0.1em;
   margin-top: 0.8rem;
 }
@@ -333,7 +333,7 @@ body::before {
 }
 .loop-box.highlight {
   border-color: var(--accent);
-  background: rgba(196,168,130,0.08);
+  background: rgba(212,184,150,0.18);
   color: var(--accent);
 }
 .loop-label {
@@ -449,11 +449,11 @@ body::before {
   overflow-x: auto;
 }
 .code-block pre { font-family: var(--ff-mono); font-size: 0.78rem; line-height: 1.8; }
-.kw { color: #C792EA; }
-.fn { color: #82AAFF; }
-.str { color: #C3E88D; }
-.cm { color: #546E7A; }
-.num { color: #F78C6C; }
+.kw { color: #D9A8FF; }
+.fn { color: #92BFFF; }
+.str { color: #C8F07D; }
+.cm { color: #8AABB5; }
+.num { color: #FFAA7A; }
 .cl { color: var(--accent); }
 .result-card {
   border: 1px solid var(--accent);
@@ -481,13 +481,13 @@ body::before {
   border-bottom: 1px solid var(--border);
 }
 .cmp-table tr.highlight-row td {
-  background: rgba(196,168,130,0.08);
+  background: rgba(212,184,150,0.16);
   color: var(--accent);
 }
 .cmp-table tr.highlight-row td:first-child { font-weight: 600; }
 .stars { letter-spacing: 0.1em; }
 .star-on { color: var(--accent); }
-.star-off { color: var(--border); }
+.star-off { color: #666; }
 
 /* ─── SLIDE 13 — Flowchart ─── */
 .flow-svg { max-width: 700px; width: 100%; }
@@ -531,8 +531,20 @@ body::before {
 .final-quote cite {
   font-family: var(--ff-mono);
   font-size: 0.65rem;
-  color: #555;
+  color: #999;
   letter-spacing: 0.1em;
+}
+
+/* ─── Laptop font boost ─── */
+@media (min-width: 900px) {
+  html { font-size: 18px; }
+  .hier-desc, .step-desc, .loop-label, .loop-box,
+  .math-card-body, .term-desc, .grad-name, .taylor-caption,
+  .bar-label, .bar-val, .bar-chart-caption, .loop-caption,
+  .card-input, .bottom-note, .stat-bottom, .fit-label,
+  .app-desc, .cmp-table td, .cmp-table th { font-size: 0.85rem; }
+  .code-block pre { font-size: 0.88rem; }
+  .result-card { font-size: 0.95rem; }
 }
 
 /* ─── Responsive ─── */
@@ -588,7 +600,7 @@ body::before {
       ΒΑΦΕΙΑΔΗΣ ΠΑΡΑΣΚΕΥΑΣ &nbsp;·&nbsp; ΠΑΠΑΣΤΑΜΑΤΙΟΥ ΡΩΜΑΝΟΣ &nbsp;·&nbsp; ΣΙΗΤΤΑΣ ΜΑΡΙΟΣ<br>
       ΤΣΑΔΙΩΤΗΣ ΜΙΧΑΛΗΣ &nbsp;·&nbsp; ΜΕΣΑΡΙΤΗΣ ΜΑΡΙΟΣ
     </div>
-    <div style="font-family:var(--ff-mono);font-size:0.6rem;color:#444;letter-spacing:0.1em;text-align:center;margin-top:0.8rem;">
+    <div style="font-family:var(--ff-mono);font-size:0.6rem;color:#999;letter-spacing:0.1em;text-align:center;margin-top:0.8rem;">
       CSE_329 / CEI_329 &nbsp;—&nbsp; Αναστάσιος Αντωνιάδης
     </div>
   </div>
@@ -612,7 +624,7 @@ body::before {
       <div class="hier-dot">02</div>
       <div class="hier-content">
         <div class="hier-label">Supervised Learning</div>
-        <div class="hier-desc">Εκπαίδευση με labeled examples (X → Y)</div>
+        <div class="hier-desc">Εκπαίδευση με labeled examples (X �� Y)</div>
       </div>
     </div>
     <div class="hier-item hier-indent-2">
@@ -762,7 +774,7 @@ body::before {
     </div>
     <div class="loop-arrow">→</div>
     <div class="loop-node">
-      <div class="loop-box" style="border-color:#444;color:#888;">r₁</div>
+      <div class="loop-box" style="border-color:#666;color:#AAA;">r₁</div>
       <div class="loop-label">Residuals</div>
     </div>
     <div class="loop-arrow">→</div>
@@ -772,7 +784,7 @@ body::before {
     </div>
     <div class="loop-arrow">→</div>
     <div class="loop-node">
-      <div class="loop-box" style="border-color:#444;color:#888;">r₂</div>
+      <div class="loop-box" style="border-color:#666;color:#AAA;">r₂</div>
       <div class="loop-label">Residuals</div>
     </div>
     <div class="loop-arrow">→</div>
@@ -887,11 +899,11 @@ body::before {
   <div class="fade-up grad-cards">
     <div class="grad-card">
       <div class="grad-sym">g<sub style="font-size:1rem">i</sub></div>
-      <div class="grad-name">Gradient<br><span style="color:#555">1η παράγωγος loss</span></div>
+      <div class="grad-name">Gradient<br><span style="color:#999">1η παράγωγος loss</span></div>
     </div>
     <div class="grad-card">
       <div class="grad-sym">h<sub style="font-size:1rem">i</sub></div>
-      <div class="grad-name">Hessian<br><span style="color:#555">2η παράγωγος loss</span></div>
+      <div class="grad-name">Hessian<br><span style="color:#999">2η παράγωγος loss</span></div>
     </div>
   </div>
   <div class="fade-up taylor-caption">
@@ -1056,14 +1068,14 @@ predictions = model.<span class="fn">predict</span>(X_test)
       <text x="600" y="290" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#8B7355">Καλύτερη επιλογή</text>
       <!-- NO from diamond 2 -->
       <line x1="600" y1="135" x2="600" y2="80" stroke="#2A2A2A" marker-end="url(#arr)"/>
-      <text x="686" y="138" font-family="IBM Plex Mono" font-size="10" fill="#555">ΟΧΙ</text>
+      <text x="686" y="138" font-family="IBM Plex Mono" font-size="10" fill="#AAA">ΟΧΙ</text>
       <line x1="600" y1="80" x2="650" y2="80" stroke="#2A2A2A"/>
       <rect x="650" y="58" width="62" height="44" rx="4" fill="#111" stroke="#2A2A2A"/>
       <text x="681" y="76" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#8B7355">Linear</text>
       <text x="681" y="91" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#8B7355">Regression</text>
       <!-- NO from diamond 1 -->
       <line x1="260" y1="135" x2="80" y2="135" stroke="#2A2A2A" marker-end="url(#arr)"/>
-      <text x="178" y="127" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#555">ΟΧΙ</text>
+      <text x="178" y="127" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#AAA">ΟΧΙ</text>
       <!-- Diamond 3 -->
       <polygon points="80,135 160,170 80,205 0,170" fill="#111" stroke="#2A2A2A" stroke-width="1"/>
       <text x="80" y="165" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#C4A882">Images/</text>
