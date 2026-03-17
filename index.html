@@ -583,9 +583,13 @@ body::before {
   /* ── Slide 04: pull quote ── */
   .pull-quote { padding-left: 1rem; font-size: 0.95rem; }
 
-  /* ── Slide 06: loop diagram horizontal scroll ── */
-  .loop-diagram { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  #slide-06 > .fade-up:last-child { width: 100%; overflow-x: auto; font-size: 0.68rem; }
+  /* ── Slide 06: loop diagram — compact to fit mobile screen ── */
+  .loop-diagram { width: 100%; overflow-x: scroll; -webkit-overflow-scrolling: touch; padding: 0.5rem 0; justify-content: center; }
+  #slide-06 .loop-node { gap: 0.15rem; }
+  #slide-06 .loop-box { font-size: 0.58rem; padding: 0.2rem 0.28rem; }
+  #slide-06 .loop-label { font-size: 0.42rem; }
+  #slide-06 .loop-arrow { font-size: 0.55rem; margin: 0 0.04rem; padding-bottom: 0.7rem; }
+  #slide-06 > .fade-up:last-child { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; font-size: 0.65rem; }
 
   /* ── Slide 07: decision flowchart — SVG horizontal scroll ── */
   #slide-07 { padding: 1.8rem 0.8rem; }
