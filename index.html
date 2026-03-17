@@ -559,10 +559,64 @@ body::before {
   .fit-diagram { flex-direction: column; }
 }
 @media (max-width: 600px) {
-  .slide { padding: 3rem 1.5rem; }
-  .loop-diagram { overflow-x: auto; }
-  .cmp-table { font-size: 0.65rem; }
-  .cmp-table td, .cmp-table th { padding: 0.5rem 0.5rem; }
+  /* ── Layout ── */
+  .slide { padding: 2.5rem 1.2rem; }
+  .title-underline { margin-bottom: 1.5rem; }
+
+  /* ── Typography scaling ── */
+  .slide-title { font-size: clamp(1.3rem, 5.5vw, 1.8rem); }
+  .display-title { font-size: clamp(2.8rem, 14vw, 4.5rem); }
+
+  /* ── Slide 01: team names wrap cleanly ── */
+  #slide-01 { text-align: center; }
+
+  /* ── Slide 02: reduce deep indents ── */
+  .hier-indent-2 { padding-left: 1.8rem; }
+  .hier-indent-3 { padding-left: 3rem; }
+  .hier-indent-4 { padding-left: 4rem; }
+  .hier-desc { font-size: 0.68rem; }
+
+  /* ── Slide 04: stat cards stack cleanly ── */
+  .stat-cards { flex-direction: column; align-items: stretch; }
+  .stat-card { min-width: 0; }
+
+  /* ── Slide 04: pull quote ── */
+  .pull-quote { padding-left: 1rem; font-size: 0.95rem; }
+
+  /* ── Slide 06: loop diagram horizontal scroll ── */
+  .loop-diagram { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* ── Slide 08: formula — remove nowrap (critical!) ── */
+  .formula-hero { white-space: normal; overflow-x: auto; padding: 1rem 1.2rem; font-size: 0.85rem; }
+
+  /* ── Slide 09: regularization term labels ── */
+  .term-labels { gap: 0.8rem; }
+  .term-sym { font-size: 0.95rem; }
+  .term-desc { font-size: 0.65rem; }
+
+  /* ── Slide 10: taylor formula ── */
+  .taylor-formula { overflow-x: auto; -webkit-overflow-scrolling: touch; font-size: 0.75rem; padding: 1rem 1.2rem; }
+
+  /* ── Slide 11: bar chart ── */
+  .bar-label { width: 82px; font-size: 0.68rem; }
+  .bar-val { font-size: 0.65rem; }
+
+  /* ── Slide 12: python code ── */
+  .code-block { padding: 0.8rem 1rem; }
+  .code-block pre { font-size: 0.62rem; line-height: 1.5; }
+  .result-card { font-size: 0.72rem; padding: 0.5rem 1rem; }
+
+  /* ── Slide 13: comparison table ── */
+  .cmp-table { font-size: 0.6rem; }
+  .cmp-table td, .cmp-table th { padding: 0.4rem 0.4rem; }
+
+  /* ── Slide 14: flowchart SVG scroll ── */
+  .flow-svg { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* ── Slide 16: conclusion statements ── */
+  .concl-statements { gap: 1rem; margin-bottom: 1.5rem; }
+  .concl-stmt { padding: 0.7rem 1rem; font-size: 0.95rem; }
+  .final-quote blockquote { font-size: 0.85rem; }
 }
 </style>
 </head>
