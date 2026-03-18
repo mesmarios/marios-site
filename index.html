@@ -1699,9 +1699,68 @@ predictions = model.<span class="fn">predict</span>(X_test)
       `
     },
     Digit3: {
-      title: 'Popup 3 — Ctrl+Shift+3',
+      title: 'Taylor Expansion — Πώς λειτουργεί η προσέγγιση',
       content: `
-        <p>Τρίτο supplementary popup. Μπορεί να περιέχει πίνακες, στατιστικά, βιβλιογραφία — ό,τι χρειαστείς κατά την παρουσίαση.</p>
+        <svg width="100%" viewBox="0 0 680 390" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Mono, monospace">
+          <defs>
+            <marker id="p3-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#505050" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+            <marker id="p3-arr-bl" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#3B8BD4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+
+          <!-- Title -->
+          <text x="340" y="22" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#F5F0E8">Πώς λειτουργεί το Taylor Expansion</text>
+
+          <!-- Axes -->
+          <line x1="60" y1="290" x2="575" y2="290" stroke="#404040" stroke-width="1" marker-end="url(#p3-arr)"/>
+          <line x1="60" y1="290" x2="60" y2="54"  stroke="#404040" stroke-width="1" marker-end="url(#p3-arr)"/>
+          <text x="582" y="290" dominant-baseline="central" font-size="11" fill="#8B7355">x</text>
+          <text x="46"  y="50"  text-anchor="middle" font-size="11" fill="#8B7355">Loss</text>
+
+          <!-- TRUE LOSS CURVE — dashed gray -->
+          <path d="M80 262 C120 232,150 194,200 174 C240 159,260 164,300 149 C340 134,370 124,420 114 C460 106,500 112,540 124"
+            fill="none" stroke="#505050" stroke-width="2" stroke-dasharray="6 3" opacity="0.7"/>
+
+          <!-- Point x0 -->
+          <circle cx="200" cy="174" r="6" fill="#D85A30"/>
+          <line x1="200" y1="290" x2="200" y2="180" stroke="#D85A30" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.6"/>
+          <text x="200" y="305" text-anchor="middle" font-size="11" fill="#C4A070">x₀</text>
+          <text x="200" y="320" text-anchor="middle" font-size="10" fill="#8B7355">(τρέχουσα θέση)</text>
+
+          <!-- 1st ORDER — tangent line (gradient only) -->
+          <path d="M100 224 L380 104" fill="none" stroke="#3B8BD4" stroke-width="1.8" stroke-dasharray="4 2"/>
+
+          <!-- 2nd ORDER — parabola (gradient + hessian) -->
+          <path d="M100 248 C140 208,170 184,200 174 C230 164,290 152,360 142 C400 137,440 134,490 136"
+            fill="none" stroke="#5DCA9B" stroke-width="2.5"/>
+
+          <!-- Annotation: gap (1st order error) -->
+          <line x1="280" y1="149" x2="280" y2="125" stroke="#3B8BD4" stroke-width="0.8" marker-end="url(#p3-arr-bl)" marker-start="url(#p3-arr-bl)"/>
+          <text x="292" y="140" font-size="10" fill="#3B8BD4">λάθος</text>
+
+          <!-- Annotation: 2nd order close -->
+          <text x="432" y="100" font-size="10" fill="#5DCA9B">πολύ κοντά!</text>
+          <line x1="440" y1="108" x2="440" y2="120" stroke="#5DCA9B" stroke-width="0.8" marker-end="url(#p3-arr)"/>
+
+          <!-- Legend box -->
+          <rect x="380" y="210" width="272" height="130" rx="5" fill="#141414" stroke="#2A2A2A" stroke-width="1"/>
+          <text x="516" y="228" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="500" fill="#F5F0E8">Υπόμνημα</text>
+
+          <line x1="398" y1="254" x2="438" y2="254" stroke="#505050" stroke-width="2" stroke-dasharray="6 3" opacity="0.7"/>
+          <text x="448" y="254" dominant-baseline="central" font-size="11" fill="#C4A070">Πραγματική Loss (δύσκολη)</text>
+
+          <line x1="398" y1="280" x2="438" y2="280" stroke="#3B8BD4" stroke-width="1.8" stroke-dasharray="4 2"/>
+          <text x="448" y="280" dominant-baseline="central" font-size="11" fill="#C4A070">1η παράγωγος μόνο (gᵢ)</text>
+
+          <line x1="398" y1="306" x2="438" y2="306" stroke="#5DCA9B" stroke-width="2.5"/>
+          <text x="448" y="306" dominant-baseline="central" font-size="11" fill="#C4A070">1η + 2η παράγωγος (gᵢ + hᵢ) ✓</text>
+
+          <!-- Bottom note -->
+          <text x="340" y="364" text-anchor="middle" font-size="11" fill="#8B7355">Η 2η παράγωγος (hᵢ = Hessian) δείχνει την καμπυλότητα → προσέγγιση πολύ πιο ακριβής</text>
+        </svg>
       `
     }
   };
