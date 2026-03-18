@@ -1167,7 +1167,7 @@ body::before {
      SLIDE 10 — TAYLOR EXPANSION
 ══════════════════════════════════════════════ -->
 <section class="slide" id="slide-10">
-  <div class="fade-up slide-title">Taylor Expansion — Γιατί Είναι Γρήγορος</div>
+  <div class="fade-up slide-title">Taylor Expansion —  Ακριβέστερη Βελτιστοποίηση</div>
   <div class="fade-up title-underline"></div>
   <div class="fade-up taylor-formula">
     L<sup>(t)</sup> &asymp; &Sigma; [g<sub>i</sub>&thinsp;&middot;&thinsp;f<sub>t</sub>(x<sub>i</sub>) &nbsp;+&nbsp; &frac12;h<sub>i</sub>&thinsp;&middot;&thinsp;f<sub>t</sub>²(x<sub>i</sub>)] &nbsp;+&nbsp; &Omega;(f<sub>t</sub>)
@@ -1595,7 +1595,7 @@ predictions = model.<span class="fn">predict</span>(X_test)
           <text x="197" y="168" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#5DCA9B">X_train + y_train</text>
           <text x="197" y="186" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#3A9A70">Το μοντέλο τα βλέπει</text>
 
-          <!-- ── Test Set (orange) ── -->
+          <!-- ── Test Set (orange) ─�� -->
           <rect x="358" y="122" width="268" height="76" rx="5" fill="#190F02" stroke="#EF9F27" stroke-width="1.2"/>
           <text x="492" y="148" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#FAC775">Test Set (20%)</text>
           <text x="492" y="168" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#EF9F27">X_test + y_test</text>
@@ -1624,11 +1624,78 @@ predictions = model.<span class="fn">predict</span>(X_test)
       `
     },
     Digit2: {
-      title: 'Popup 2 — Ctrl+Shift+2',
+      title: 'Regularization — Overfitting vs Good Fit',
       content: `
-        <p>Παράδειγμα <strong>εικόνας</strong> — βάλε το src της εικόνας:</p>
-        <!-- <img src="your-image.png" alt="description"> -->
-        <p style="color:#555;font-style:italic;">[ Εικόνα placeholder — αντικατάστησε με src ]</p>
+        <svg width="100%" viewBox="0 0 680 330" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Mono, monospace">
+          <defs>
+            <marker id="p2-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#404040" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+
+          <!-- LEFT: Χωρίς Regularization -->
+          <rect x="20" y="12" width="295" height="30" rx="5" fill="#1A0C07" stroke="#F0997B" stroke-width="1"/>
+          <text x="167" y="27" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#F5C4B3">Χωρίς Regularization</text>
+          <text x="167" y="54" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#C4A070">Overfitting — αποµνηµονεύει κάθε σηµείο</text>
+
+          <!-- Axes LEFT -->
+          <line x1="50" y1="258" x2="298" y2="258" stroke="#404040" stroke-width="1" marker-end="url(#p2-arr)"/>
+          <line x1="50" y1="258" x2="50" y2="76" stroke="#404040" stroke-width="1" marker-end="url(#p2-arr)"/>
+          <text x="172" y="276" text-anchor="middle" font-size="10" fill="#8B7355">X (μετρήσεις ασθενή)</text>
+          <text x="32" y="170" text-anchor="middle" font-size="10" fill="#8B7355">y</text>
+
+          <!-- Data points LEFT -->
+          <circle cx="75"  cy="228" r="5" fill="#D85A30" opacity="0.9"/>
+          <circle cx="100" cy="196" r="5" fill="#D85A30" opacity="0.9"/>
+          <circle cx="125" cy="213" r="5" fill="#D85A30" opacity="0.9"/>
+          <circle cx="150" cy="172" r="5" fill="#D85A30" opacity="0.9"/>
+          <circle cx="175" cy="186" r="5" fill="#D85A30" opacity="0.9"/>
+          <circle cx="200" cy="148" r="5" fill="#D85A30" opacity="0.9"/>
+          <circle cx="225" cy="162" r="5" fill="#D85A30" opacity="0.9"/>
+          <circle cx="250" cy="124" r="5" fill="#D85A30" opacity="0.9"/>
+          <circle cx="275" cy="138" r="5" fill="#D85A30" opacity="0.9"/>
+
+          <!-- Overfitting curve — wiggly -->
+          <path d="M72 230 C82 226,92 193,100 196 C108 199,116 216,125 213 C133 210,141 170,150 172 C158 174,166 188,175 186 C183 184,191 146,200 148 C208 150,216 164,225 162 C233 160,241 122,250 124 C258 126,267 140,275 138"
+            fill="none" stroke="#D85A30" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+          <text x="167" y="305" text-anchor="middle" font-size="11" fill="#993C1D">✗ Δεν γενικεύει σε νέα δεδοµένα</text>
+
+          <!-- VS -->
+          <text x="340" y="170" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#F5F0E8">VS</text>
+
+          <!-- RIGHT: Με Regularization -->
+          <rect x="385" y="12" width="275" height="30" rx="5" fill="#071510" stroke="#5DCA9B" stroke-width="1"/>
+          <text x="522" y="27" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#9FE1CB">Με Regularization</text>
+          <text x="522" y="54" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#C4A070">Good fit — μαθαίνει το γενικό pattern</text>
+
+          <!-- Axes RIGHT -->
+          <line x1="410" y1="258" x2="655" y2="258" stroke="#404040" stroke-width="1" marker-end="url(#p2-arr)"/>
+          <line x1="410" y1="258" x2="410" y2="76" stroke="#404040" stroke-width="1" marker-end="url(#p2-arr)"/>
+          <text x="530" y="276" text-anchor="middle" font-size="10" fill="#8B7355">X (μετρήσεις ασθενή)</text>
+          <text x="392" y="170" text-anchor="middle" font-size="10" fill="#8B7355">y</text>
+
+          <!-- Data points RIGHT -->
+          <circle cx="430" cy="228" r="5" fill="#3A9A70" opacity="0.9"/>
+          <circle cx="455" cy="196" r="5" fill="#3A9A70" opacity="0.9"/>
+          <circle cx="480" cy="213" r="5" fill="#3A9A70" opacity="0.9"/>
+          <circle cx="505" cy="172" r="5" fill="#3A9A70" opacity="0.9"/>
+          <circle cx="530" cy="186" r="5" fill="#3A9A70" opacity="0.9"/>
+          <circle cx="555" cy="148" r="5" fill="#3A9A70" opacity="0.9"/>
+          <circle cx="580" cy="162" r="5" fill="#3A9A70" opacity="0.9"/>
+          <circle cx="605" cy="124" r="5" fill="#3A9A70" opacity="0.9"/>
+          <circle cx="630" cy="138" r="5" fill="#3A9A70" opacity="0.9"/>
+
+          <!-- Smooth trend line -->
+          <path d="M425 233 C470 212, 510 190, 550 167 C580 149, 610 134, 636 124"
+            fill="none" stroke="#5DCA9B" stroke-width="2.5" stroke-linecap="round"/>
+
+          <!-- New patient prediction -->
+          <circle cx="530" cy="170" r="7" fill="none" stroke="#5DCA9B" stroke-width="1.5" stroke-dasharray="3 2"/>
+          <text x="544" y="163" font-size="10" fill="#5DCA9B">νέος ασθενής</text>
+
+          <text x="522" y="305" text-anchor="middle" font-size="11" fill="#5DCA9B">✓ Γενικεύει σε νέα δεδοµένα</text>
+        </svg>
       `
     },
     Digit3: {
